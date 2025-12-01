@@ -101,7 +101,7 @@ def main():
     print("Initializing system...\n")
     
     try:
-        # Determinar modo de operación
+        # Determinar modo de operación 
         mode = input("Select mode - (1) Voice Mode, (2) Text Mode: ").strip()
         
         if mode == "1":
