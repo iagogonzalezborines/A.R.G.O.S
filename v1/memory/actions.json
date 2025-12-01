@@ -1,0 +1,44 @@
+{
+    "actions": {
+        "core_argos_actions": [
+            {
+                "name": "read_file",
+                "description": "Read the content of a file.",
+                "params": {
+                    "path": "string - path to the file"
+                },
+                "exec_type": "python",
+                "exec_code": "read_file(path)"
+            },
+            {
+                "name": "write_file",
+                "description": "Write content to a file (overwrites existing content).",
+                "params": {
+                    "path": "string - path to the file",
+                    "content": "string - content to write"
+                },
+                "exec_type": "python",
+                "exec_code": "write_file(path, content)"
+            },
+            {
+                "name": "create_or_update_action",
+                "description": "Create a new action or update an existing one in actions.json.",
+                "params": {
+                    "action_definition": "object - full JSON of the action"
+                },
+                "exec_type": "python",
+                "exec_code": "update_actions_json(action_definition)"
+            },
+            {
+                "name": "request_file",
+                "description": "Request file content from user/program if missing.",
+                "params": {
+                    "file_name": "string - name of file",
+                    "reason": "string - why the file is needed"
+                },
+                "exec_type": "action",
+                "exec_code": "SPEAK: Requesting file '{file_name}' because {reason}"
+            }
+        ]
+    }
+}

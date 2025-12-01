@@ -1,0 +1,257 @@
+{
+    "actions": [
+        {
+            "related_actions": [
+                {
+                    "name": "access_actions",
+                    "description": "Returns the list of available actions, their metadata and usage. Read-only.",
+                    "params": {},
+                    "exec_type": "python",
+                    "exec_code": "list_actions()",
+                    "safety": "Do not expose internal endpoints, secrets, or credentials. Only return public metadata."
+                },
+                {
+                    "name": "access_memory",
+                    "description": "Reads or writes persistent memory entries used for long-term context.",
+                    "params": {
+                        "operation": "string (one of: 'get','set','delete','list')",
+                        "key": "string (required for get/set/delete)",
+                        "value": "string (required for set)"
+                    },
+                    "exec_type": "python",
+                    "exec_code": "access_memory(operation, key, value)",
+                    "safety": "Require explicit user consent before accessing personal data. Enforce validation and ACLs. Persist only within approved memory root."
+                },
+                {
+                    "name": "access_short_memory",
+                    "description": "Reads or writes ephemeral session-scoped memory (short-lived).",
+                    "params": {
+                        "operation": "string (one of: 'get','set','delete','list')",
+                        "key": "string",
+                        "value": "string",
+                        "ttl_seconds": "number (optional, time-to-live in seconds)"
+                    },
+                    "exec_type": "python",
+                    "exec_code": "access_short_memory(operation, key, value, ttl_seconds)",
+                    "safety": "Ephemeral only. Never persist beyond session unless explicitly authorized. Do not store sensitive personal data without consent."
+                },
+                {
+                    "name": "get_action_function",
+                    "description": "Returns a sanitized representation of the implementation/signature of the named action so the AI can understand how to invoke it programmatically.",
+                    "params": {
+                        "action_name": "string"
+                    },
+                    "exec_type": "python",
+                    "exec_code": "get_action_function(action_name)",
+                    "returns": {
+                        "type": "object",
+                        "description": "Sanitized action information suitable for AI use.",
+                        "fields": {
+                            "signature": "string (function signature or callable description)",
+                            "params": "object (parameter names and types)",
+                            "exec_type": "string",
+                            "invocation_example": "string (example call with placeholders)",
+                            "notes": "string (safety/limitations)"
+                        }
+                    },
+                    "safety": "Return only sanitized metadata; never reveal secrets, credentials, internal endpoints, or raw implementation code. Enforce ACLs and explicit user authorization for restricted actions."
+                }
+                ]
+            },
+            {
+                "name": "keyboard_macro",
+                "description": "Sends synthetic keyboard input (shortcuts, typing, navigation keys) to the focused application.",
+                "params": {
+                    "sequence": "array (required) — ordered steps; each step can be a string like 'ctrl+c', 'ctrl+v', 'tab', 'win', or an object {\"type\":\"text\",\"value\":\"...\"} to type literal text.",
+                    "delay_ms": "number (optional) — milliseconds to wait between steps (default: 50).",
+                    "repeat": "number (optional) — how many times to repeat the sequence (default: 1)",
+                    "target_window": "string (optional) — identifier/title of window to focus before sending keys; if omitted, sends to current focus."
+                },
+                "exec_type": "python",
+                "exec_code": "keyboard_macro(sequence, delay_ms=50, repeat=1, target_window=None)",
+                "safety": "Require explicit user consent before executing. Disallow automation of sensitive actions (typing passwords, confirming destructive dialogs, sequences that trigger privilege elevation). Block or prompt for any system-critical combinations (e.g., ctrl+alt+del). Operate only on user-approved target windows and log actions for audit."
+            },
+            {
+            "name": "web_search",
+            "description": "Performs a real internet search using the local browserless API or serpapi, returns processed results to the AI.",
+            "params": {
+                "query": "string"
+            },
+            "exec_type": "api",
+            "endpoint": "http://localhost:PORT/search",
+            "method": "POST",
+            "safety": "No personal data may be sent unless user asked."
+        },
+        {
+            "name": "browser_open_url",
+            "description": "Opens the default system browser to a specific URL.",
+            "params": {
+                "url": "string"
+            },
+            "exec_type": "system",
+            "command": "start {url}",
+            "safety": "Allow only http/https URLs."
+        },
+        {
+            "name": "browser_interact",
+            "description": "Uses Browser-Control API to navigate the web headlessly (click, type, extract text).",
+            "params": {
+                "url": "string",
+                "actions": "array"
+            },
+            "exec_type": "api",
+            "endpoint": "http://localhost:PORT/browser",
+            "method": "POST"
+        },
+        {
+            "name": "open_program",
+            "description": "Opens a Windows program using its executable name.",
+            "params": {
+                "program": "string"
+            },
+            "exec_type": "system",
+            "command": "start {program}",
+            "safety": "Block critical system executables (cmd.exe, powershell.exe elevated, diskpart...)."
+        },
+        {
+            "name": "open_file",
+            "description": "Opens a file inside the shared folder.",
+            "params": {
+                "path": "string"
+            },
+            "exec_type": "system",
+            "command": "start {path}",
+            "safety": "Only files inside shared folder allowed."
+        },
+        {
+            "name": "read_file",
+            "description": "Reads a text file and returns its content to the AI.",
+            "params": {
+                "path": "string"
+            },
+            "exec_type": "python",
+            "exec_code": "read_file(path)",
+            "safety": "Read-only. Must stay inside memory root."
+        },
+        {
+            "name": "write_file",
+            "description": "Writes or edits content in a file. Used by the AI to modify context, memory, actions.",
+            "params": {
+                "path": "string",
+                "content": "string"
+            },
+            "exec_type": "python",
+            "exec_code": "write_file(path, content)",
+            "safety": "Validate modifications using rules before writing. Never allow system-level overwrite."
+        },
+        {
+            "name": "append_file",
+            "description": "Appends content to an existing file.",
+            "params": {
+                "path": "string",
+                "content": "string"
+            },
+            "exec_type": "python",
+            "exec_code": "append_file(path, content)"
+        },
+        {
+            "name": "3d_generate_model",
+            "description": "Uses Meshy API to generate a 3D model from a prompt. Saves the .obj/.stl into projects folder.",
+            "params": {
+                "prompt": "string",
+                "project": "string"
+            },
+            "exec_type": "api",
+            "endpoint": "https://api.meshy.ai/v1/model",
+            "method": "POST"
+        },
+        {
+            "name": "3d_slice_model",
+            "description": "Uses Bambu Studio command line or API to slice a model to .gcode.",
+            "params": {
+                "model_path": "string",
+                "settings": "object"
+            },
+            "exec_type": "system",
+            "command": "bambu-slicer --input {model_path} --settings {settings}"
+        },
+        {
+            "name": "3d_send_to_printer",
+            "description": "Sends the G-code to the Bambu Lab printer via its LAN API.",
+            "params": {
+                "gcode_path": "string",
+                "printer_ip": "string"
+            },
+            "exec_type": "api",
+            "method": "POST",
+            "endpoint": "http://{printer_ip}/printer/send"
+        },
+        {
+            "name": "create_project",
+            "description": "Initialize a programming project folder with boilerplate files.",
+            "params": {
+                "name": "string",
+                "type": "string"
+            },
+            "exec_type": "python",
+            "exec_code": "create_project(name, type)"
+        },
+        {
+            "name": "add_code_file",
+            "description": "Adds or edits a code file inside a project.",
+            "params": {
+                "project": "string",
+                "path": "string",
+                "content": "string"
+            },
+            "exec_type": "python",
+            "exec_code": "write_project_file(project, path, content)"
+        },
+        {
+            "name": "run_project",
+            "description": "Runs a programming project (Python, Node, C#, etc.).",
+            "params": {
+                "project": "string"
+            },
+            "exec_type": "system",
+            "command": "cd projects/{project} && run"
+        },
+        {
+            "name": "webcam_image_recognition",
+            "description": "Captura una imagen desde la webcam y la analiza para reconocer objetos, personas o identificar al usuario.",
+            "args": {
+                "mode": {
+                    "type": "string",
+                    "description": "Modo de reconocimiento: 'objetos', 'personas', 'usuario', 'emociones', 'todo'.",
+                    "required": true
+                },
+                "confidence_threshold": {
+                    "type": "number",
+                    "description": "Nivel mínimo de confianza requerido para aceptar una detección.",
+                    "required": false,
+                    "default": 0.5
+                }
+            },
+            "returns": {
+                "type": "object",
+                "description": "Resultados del análisis visual.",
+                "fields": {
+                    "image_path": "Ruta temporal donde se guardó la captura.",
+                    "detections": "Lista de objetos/personas detectados con coordenadas, nombre y confianza.",
+                    "notes": "Información adicional o advertencias."
+                }
+            },
+            "safety": {
+                "requires_confirmation_if": [
+                    "mode == 'usuario'",
+                    "mode == 'personas'"
+                ],
+                "notes": [
+                    "No almacena imágenes permanentemente.",
+                    "Solo analiza contenido visible en la webcam que el usuario explícitamente permite.",
+                    "Nunca usa el reconocimiento facial para acciones sensibles sin autorización del usuario."
+                ]
+            }
+        }
+    ]
+}

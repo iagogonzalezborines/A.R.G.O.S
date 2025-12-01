@@ -114,53 +114,53 @@ def listen_for_stop():
             if not is_playing_mp3:
                 break
 
-def handle_special_command():
-    """Handle the special 'home' command."""
-    global is_playing_mp3
-    speak("Welcome home, sir.")
-    play_mp3("intro.mp3")
-    is_playing_mp3 = True
-    listen_for_stop()
+# def handle_special_command():
+#     """Handle the special 'home' command."""
+#     global is_playing_mp3
+#     speak("Welcome home, sir.")
+#     play_mp3("intro.mp3")
+#     is_playing_mp3 = True
+#     listen_for_stop()
 
-def handle_shutdown_command():
-    """Handle the shutdown command."""
-    global is_shutdown
-    speak("Shutting down as instructed, sir.")
-    # Send the /bye command to the model to get the farewell message
-    result = chain.invoke({"context": initial_prompt, "question": "/bye"}).strip()
-    speak(result)
-    is_shutdown = True  # Set the shutdown flag to True to exit the loop
+# def handle_shutdown_command():
+#     """Handle the shutdown command."""
+#     global is_shutdown
+#     speak("Shutting down as instructed, sir.")
+#     # Send the /bye command to the model to get the farewell message
+#     result = chain.invoke({"context": initial_prompt, "question": "/bye"}).strip()
+#     speak(result)
+#     is_shutdown = True  # Set the shutdown flag to True to exit the loop
 
-def handle_browser_command(query):
-    """Handle browser commands."""
-    speak("Researching now, sir.")
-    webbrowser.open(f"https://www.google.com/search?q={query}")
+# def handle_browser_command(query):
+#     """Handle browser commands."""
+#     speak("Researching now, sir.")
+#     webbrowser.open(f"https://www.google.com/search?q={query}")
 
-def handle_youtube_command():
-    """Handle the YouTube command."""
-    speak("Opening YouTube now, sir.")
-    webbrowser.open("https://www.youtube.com")
+# def handle_youtube_command():
+#     """Handle the YouTube command."""
+#     speak("Opening YouTube now, sir.")
+#     webbrowser.open("https://www.youtube.com")
 
-def get_weather(location):
-    """Fetch and return weather information for a given location."""
-    params = {'key': API_KEY, 'q': location}
-    try:
-        response = requests.get(ENDPOINT, params=params)
-        response.raise_for_status()
-        data = response.json()
-        return (
-            f"Weather information for {location}:\n"
-            f"Location: {data['location']['name']}, {data['location']['region']}, {data['location']['country']}\n"
-            f"Temperature (Celsius): {data['current']['temp_c']}\n"
-            f"Condition: {data['current']['condition']['text']}\n"
-            f"Humidity: {data['current']['humidity']}\n"
-            f"Wind Speed (km/h): {data['current']['wind_kph']}"
-        )
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Error fetching weather data: {e}")
-        return "I encountered an error while fetching the weather data."
+# def get_weather(location):
+#     """Fetch and return weather information for a given location."""
+#     params = {'key': API_KEY, 'q': location}
+#     try:
+#         response = requests.get(ENDPOINT, params=params)
+#         response.raise_for_status()
+#         data = response.json()
+#         return (
+#             f"Weather information for {location}:\n"
+#             f"Location: {data['location']['name']}, {data['location']['region']}, {data['location']['country']}\n"
+#             f"Temperature (Celsius): {data['current']['temp_c']}\n"
+#             f"Condition: {data['current']['condition']['text']}\n"
+#             f"Humidity: {data['current']['humidity']}\n"
+#             f"Wind Speed (km/h): {data['current']['wind_kph']}"
+#         )
+#     except requests.exceptions.RequestException as e:
+#         logging.error(f"Error fetching weather data: {e}")
+#         return "I encountered an error while fetching the weather data."
 
-def write_markdown(response_text):
+# def write_markdown(response_text):
     """Write the AI response to a Markdown file and open it in Obsidian."""
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     filename = os.path.join(MARKDOWN_FOLDER, f"response_{timestamp}.md")
@@ -209,21 +209,21 @@ def listen_and_respond():
 
                 if "home" in command:
                     handle_special_command()
-                elif "shutdown" in command or "shut down" in command:
-                    handle_shutdown_command()
-                    break  # Exit the loop after handling shutdown
-                elif any(keyword in command for keyword in ["browser", "browse", "search for", "research"]):
-                    query = command.split(maxsplit=1)[1].strip() if len(command.split(maxsplit=1)) > 1 else ""
-                    handle_browser_command(query)
-                elif "youtube" in command:
-                    handle_youtube_command()
-                elif "weather" in command:
-                    location = command.replace("weather", "").strip() or DEFAULT_LOCATION
-                    weather_info = get_weather(location)
-                    speak(weather_info)
-                elif "write that down" in command:
-                    speak("Of course sir, writing that down.")
-                    write_markdown(context.split('\n')[-1])  # Assuming the last line is the latest response
+                # elif "shutdown" in command or "shut down" in command:
+                #     handle_shutdown_command()
+                #     break  # Exit the loop after handling shutdown
+                # elif any(keyword in command for keyword in ["browser", "browse", "search for", "research"]):
+                #     query = command.split(maxsplit=1)[1].strip() if len(command.split(maxsplit=1)) > 1 else ""
+                #     handle_browser_command(query)
+                # elif "youtube" in command:
+                #     handle_youtube_command()
+                # elif "weather" in command:
+                #     location = command.replace("weather", "").strip() or DEFAULT_LOCATION
+                #     weather_info = get_weather(location)
+                #     speak(weather_info)
+                # elif "write that down" in command:
+                #     speak("Of course sir, writing that down.")
+                #     write_markdown(context.split('\n')[-1])  # Assuming the last line is the latest response
                 else:
                     result = chain.invoke({"context": context, "question": command}).strip()
                     speak(result)
