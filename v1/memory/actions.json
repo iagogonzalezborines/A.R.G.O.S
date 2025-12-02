@@ -1,6 +1,18 @@
 {
     "actions": {
-        "core_argos_actions": [
+        "core_argos_actions": {
+            "source_file": "v1/experimental/actions/core_argos_actions.py",
+            "actions": [
+            {
+                "name": "access_actions",
+                "description": "Retrieve the list of available actions or the full definition of a specific action from actions.json.",
+                "params": {
+                    "action_name": "string (optional) - name of the action to retrieve; if omitted, return a list of all action names",
+                    "include_internal": "boolean (optional) - include internal/hidden actions when listing (default: false)"
+                },
+                "exec_type": "python",
+                "exec_code": "access_actions(action_name=None, include_internal=False)"
+            },
             {
                 "name": "read_file",
                 "description": "Read the content of a file.",
@@ -21,13 +33,29 @@
                 "exec_code": "write_file(path, content)"
             },
             {
-                "name": "create_or_update_action",
-                "description": "Create a new action or update an existing one in actions.json.",
+                "name": "update_actions_json",
+                "description": "Create a new action or update an existing one in core_argos_actions in actions.json.",
                 "params": {
-                    "action_definition": "object - full JSON of the action"
+                    "action_definition": "object - full JSON definition of the action"
                 },
                 "exec_type": "python",
                 "exec_code": "update_actions_json(action_definition)"
+            },
+            {
+                "name": "create_action",
+                "description": "Create or update an action by adding it to auto_updated_actions in actions.json, writing the function to autoupdated_controller.py, and restarting the system.",
+                "params": {
+                    "action_definition": "object - full JSON definition of the action including name, description, params, exec_type, and exec_code"
+                },
+                "exec_type": "python",
+                "exec_code": "create_action(action_definition)"
+            },
+            {
+                "name": "get_argos_root",
+                "description": "Get the root A.R.G.O.S folder path.",
+                "params": {},
+                "exec_type": "python",
+                "exec_code": "get_argos_root()"
             },
             {
                 "name": "request_file",
@@ -38,7 +66,55 @@
                 },
                 "exec_type": "action",
                 "exec_code": "SPEAK: Requesting file '{file_name}' because {reason}"
+            },
+            {
+                "name": "get_file_tree",
+                "description": "Return the file structure of the A.R.G.O.S folder in JSON format.",
+                "params": {
+                    "max_depth": "integer (optional) - maximum depth to traverse (default: 10)",
+                    "include_hidden": "boolean (optional) - include hidden files and folders (default: false)"
+                },
+                "exec_type": "python",
+                "exec_code": "get_file_tree(max_depth=10, include_hidden=False)"
+            },
+            {
+                "name": "find_file",
+                "description": "Search for files in the A.R.G.O.S root folder by name or pattern.",
+                "params": {
+                    "filename": "string - name or pattern of the file to search",
+                    "recursive": "boolean (optional) - search recursively in subdirectories (default: true)"
+                },
+                "exec_type": "python",
+                "exec_code": "find_file(filename, recursive=True)"
+            },
+            {
+                "name": "execute_cmd",
+                "description": "Execute a command in CMD at the project root directory and return the output.",
+                "params": {
+                    "command": "string - the command to execute in CMD",
+                    "timeout": "integer (optional) - timeout in seconds (default: 30)"
+                },
+                "exec_type": "python",
+                "exec_code": "execute_cmd(command, timeout=30)"
             }
         ]
+        },
+        "auto_updated_actions": {
+            "source_file": "v1/experimental/autoupdated_controller.py",
+            "actions": [
+            {
+                "name": "fetch_webpage",
+                "description": "Fetch a webpage via HTTP GET, return raw HTML or parsed text. Uses requests and BeautifulSoup.",
+                "params": {
+                    "url": "string - the URL to fetch",
+                    "parse": "boolean (optional) - whether to parse with BeautifulSoup and return text (default: false)",
+                    "timeout": "integer (optional) - timeout in seconds (default: 10)",
+                    "user_agent": "string (optional) - custom User-Agent header (default: Mozilla/5.0 compatible)"
+                },
+                "exec_type": "python",
+                "exec_code": "fetch_webpage(url, parse=False, timeout=10, user_agent=None)"
+            }
+        ]
+        }
     }
-}
+    }
